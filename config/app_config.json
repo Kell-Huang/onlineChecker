@@ -1,0 +1,28 @@
+{
+  "api": {
+    "timeout_connect": 10,
+    "timeout_read": 60,
+    "batch_size": 200,
+    "batch_interval_seconds": 1.0,
+    "max_retries": 2,
+    "retry_backoff_seconds": [2, 4]
+  },
+  "download": {
+    "concurrency": 5,
+    "max_retries": 3,
+    "retry_backoff_seconds": [2, 4, 8],
+    "timeout_connect": 10,
+    "timeout_read": 60,
+    "chunk_size_bytes": 65536
+  },
+  "sampling": {
+    "max_per_country": 1000,
+    "random_seed": 42
+  },
+  "paths": {
+    "output_dir": "output",
+    "logs_dir": "logs",
+    "api_file_savings": "api_file_savings",
+    "preview_dir": "api_file_savings/_preview"
+  }
+}
