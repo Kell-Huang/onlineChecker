@@ -222,25 +222,36 @@ def test_empty_selection_shows_the_hint():
 # Results page
 # ---------------------------------------------------------------------------
 
-def test_results_page_renders_six_columns_and_totals():
+def test_results_page_renders_the_summary_and_both_reasons():
     _app()
     from ui.results_page import COLUMNS, ResultsPage
 
     page = ResultsPage()
     page.set_rows([
         {"country": "uk", "gos_count": 100, "not_in_channel_count": 7,
-         "skipped_count": 2, "top_reason_1": '"price" is 0', "top_reason_1_pct": 50.0},
+         "skipped_count": 2, "top_reason_1": '"price" is 0', "top_reason_1_pct": 50.0,
+         "top_reason_2": '"stock" is 0', "top_reason_2_pct": 25.0},
         {"country": "de", "gos_count": 50, "not_in_channel_count": 0,
-         "skipped_count": 0, "top_reason_1": "", "top_reason_1_pct": 0.0},
+         "skipped_count": 0, "top_reason_1": "", "top_reason_1_pct": 0.0,
+         "top_reason_2": "", "top_reason_2_pct": 0.0},
     ])
 
-    assert page.table.columnCount() == len(COLUMNS) == 6
+    assert page.table.columnCount() == len(COLUMNS) == 5
     assert page.table.rowCount() == 2
     assert page.table.item(0, 0).text() == "uk"
     assert page.table.item(0, 1).text() == "100"
     assert page.table.item(0, 4).text() == '"price" is 0'
-    assert page.table.item(0, 5).text() == "50.0%"
-    assert page.table.item(1, 4).text() == "—"       # no reason
+
+    # The reason cell carries both reasons with their shares, in order.
+    pairs = page.table.item(0, 4).data(Qt.UserRole)
+    assert pairs == [('"price" is 0', 50.0), ('"stock" is 0', 25.0)]
+    assert page.table.item(1, 4).data(Qt.UserRole) == []
+
+    headers = [page.table.horizontalHeaderItem(i).text()
+               for i in range(page.table.columnCount())]
+    assert headers == ["Country", "SFCC Online", "Not in Google Shopping",
+                       "Skipped", "Skip reason"]
+
     assert "2 countries" in page.totals_label.text()
     assert "150 online" in page.totals_label.text()
     page.deleteLater()
