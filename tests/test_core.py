@@ -60,7 +60,8 @@ def test_legacy_session_is_migrated_once(config_dir):
                 "channel_name": "GOS"},
         "feeds": [
             {"country": "uk", "site_id": "2", "channel_id": "10",
-             "url": "http://x/uk.csv", "channel_name": "UK feed"},
+             "url": "http://x/uk.csv", "channel_name": "UK feed",
+             "project_id": "77"},
             {"country": "de", "site_id": "3", "channel_id": "11",
              "url": "http://x/de.csv", "channel_name": "DE feed"},
         ],
@@ -70,6 +71,9 @@ def test_legacy_session_is_migrated_once(config_dir):
     selection = settings_module.load_selection()
     assert selection.gos.channel_name == "GOS"
     assert [feed.country for feed in selection.feeds] == ["uk", "de"]
+    # project_id is part of the session and must survive the migration: losing
+    # it silently would break any later "refresh this feed from the API".
+    assert selection.feeds[0].project_id == "77"
     # The old file only listed the feeds that were selected, so all stay ticked.
     assert selection.selected == ["2/10", "3/11"]
     assert (config_dir / "selection.json").exists()
