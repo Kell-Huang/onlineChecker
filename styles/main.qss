@@ -140,6 +140,42 @@ QLineEdit#searchEdit {
     max-width: 320px;
 }
 
+/* Spin box arrows: without explicit sub-controls Qt draws them outside the
+   rounded field, which looked like two stray dashes. */
+QSpinBox {
+    padding-right: 20px;
+}
+
+QSpinBox::up-button,
+QSpinBox::down-button {
+    subcontrol-origin: border;
+    width: 18px;
+    background-color: transparent;
+    border: none;
+}
+
+QSpinBox::up-button {
+    subcontrol-position: top right;
+    margin: 3px 3px 0 0;
+}
+
+QSpinBox::down-button {
+    subcontrol-position: bottom right;
+    margin: 0 3px 3px 0;
+}
+
+QSpinBox::up-arrow {
+    image: url(@ASSETS@/chevron-up.svg);
+    width: 9px;
+    height: 9px;
+}
+
+QSpinBox::down-arrow {
+    image: url(@ASSETS@/chevron-down.svg);
+    width: 9px;
+    height: 9px;
+}
+
 /* ---------------------------------------------------------------- trees */
 
 QTreeWidget#countryTree,

@@ -219,15 +219,6 @@ def load_countries() -> Tuple[Dict[str, str], Dict[str, Dict[str, str]]]:
     return ({str(k): str(v) for k, v in aliases.items()}, table)
 
 
-def country_columns(country: str,
-                    table: Dict[str, Dict[str, str]]) -> Dict[str, str]:
-    """GOS columns for a country code, tolerating case and separators."""
-    if not country:
-        return {}
-    key = country.strip().lower().replace("_", "-")
-    return dict(table.get(key) or {})
-
-
 # ---------------------------------------------------------------------------
 # Selection (the saved state)
 # ---------------------------------------------------------------------------

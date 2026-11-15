@@ -12,7 +12,7 @@ the same numbers without a second place to look.
 """
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
     QHBoxLayout, QLabel, QMainWindow, QMessageBox, QPlainTextEdit,
@@ -21,9 +21,9 @@ from PySide6.QtWidgets import (
 
 from core.models import Feed, Selection
 from core.progress import ProgressUpdate
-from core.settings import (load_countries, load_credentials, load_selection,
-                           load_settings, save_credentials, save_selection,
-                           save_settings)
+from core.settings import (BASE_DIR, load_countries, load_credentials,
+                           load_selection, load_settings, save_credentials,
+                           save_selection, save_settings)
 
 from .browse_page import BrowsePage
 from .country_page import CountryPage
@@ -208,8 +208,10 @@ class MainWindow(QMainWindow):
         self._settings.random_seed = seed
         if output:
             path = Path(output)
+            # Relative paths are resolved against the project root, not the
+            # working directory the app happened to be launched from.
             self._settings.output_dir = path if path.is_absolute() \
-                else Path.cwd() / path
+                else BASE_DIR / path
         save_settings(self._settings)
         self._update_summary()
         self._log("INFO", "Settings saved.")
@@ -241,6 +243,7 @@ class MainWindow(QMainWindow):
         self.status_label.setText("Starting…")
         self.start_btn.setEnabled(False)
         self.cancel_btn.setEnabled(True)
+        self._set_pages_enabled(False)
         self.results_page.clear()
 
         self._worker = RunWorker(self._selection, self._settings,
@@ -291,7 +294,13 @@ class MainWindow(QMainWindow):
     def _finish_run(self) -> None:
         self._worker = None
         self.cancel_btn.setEnabled(False)
+        self._set_pages_enabled(True)
         self.start_btn.setEnabled(bool(self._selection.selected))
+
+    def _set_pages_enabled(self, enabled: bool) -> None:
+        """Editing the selection mid-run would not affect the run, only confuse."""
+        self.country_page.setEnabled(enabled)
+        self.browse_page.setEnabled(enabled)
 
     # ------------------------------------------------------------------
 

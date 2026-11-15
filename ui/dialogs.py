@@ -5,12 +5,12 @@ text away from the icon, which is why the app draws its own: a line glyph on a
 tinted badge, a title over a body, and an explicit primary/secondary button
 hierarchy.
 """
-from typing import Iterable, Optional, Sequence, Tuple
+from typing import Tuple
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QDialog, QDoubleSpinBox, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
-    QMessageBox, QPushButton, QSizePolicy, QSpinBox, QVBoxLayout,
+    QDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
+    QPushButton, QSizePolicy, QSpinBox, QVBoxLayout,
 )
 
 from core.settings import Settings
@@ -122,17 +122,6 @@ def show_message(parent, title: str, message: str,
     dialog = MessageDialog(parent, title, message,
                            _ICON_SEVERITY.get(icon, "info"))
     return dialog.exec()
-
-
-def show_question(parent, title: str, message: str,
-                  default_no: bool = True) -> bool:
-    """Yes/No confirmation; True only on an explicit Yes."""
-    dialog = MessageDialog(
-        parent, title, message, "question",
-        [("No", False, default_no), ("Yes", True, not default_no)],
-    )
-    dialog.exec()
-    return dialog.choice == 1
 
 
 class SettingsDialog(QDialog):

@@ -13,7 +13,7 @@ Everything is done in Polars except the numeric parsing, which has to tolerate
 currency symbols and European decimal commas.
 """
 import re
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple
 
 import polars as pl
 
@@ -93,15 +93,9 @@ def filter_online(gos_df: pl.DataFrame, online_column: str,
         return pl.DataFrame(schema={"sku": pl.Utf8, "normalized_sku": pl.Utf8})
 
     unparsed: Dict[str, int] = {}
-    stock_parser = _counting_parser(stock_column, unparsed)
-    price_parser = _counting_parser(price_column, unparsed)
-
-    subset = subset.with_columns([
-        pl.col(stock_column).cast(pl.Utf8, strict=False)
-        .map_elements(stock_parser, return_dtype=pl.Float64).alias("_stock"),
-        pl.col(price_column).cast(pl.Utf8, strict=False)
-        .map_elements(price_parser, return_dtype=pl.Float64).alias("_price"),
-    ])
+    stock = _numeric_column(subset, stock_column, unparsed)
+    price = _numeric_column(subset, price_column, unparsed)
+    subset = subset.with_columns([stock.alias("_stock"), price.alias("_price")])
     subset = subset.filter((pl.col("_stock") > 0) & (pl.col("_price") > 0))
 
     for column, count in unparsed.items():
@@ -118,13 +112,38 @@ def filter_online(gos_df: pl.DataFrame, online_column: str,
     ]).unique(subset=["normalized_sku"], keep="first")
 
 
-def _counting_parser(column: str, counters: Dict[str, int]):
-    def parse(raw):
-        value, ok = parse_number(raw)
-        if not ok:
-            counters[column] = counters.get(column, 0) + 1
-        return value
-    return parse
+def _numeric_column(frame: pl.DataFrame, column: str,
+                     counters: Dict[str, int]) -> pl.Series:
+    """Cast a stock/price column to floats, parsing only what Polars cannot.
+
+    Polars casts "9.99", "5" and "-3" natively in Rust. Values like
+    "€ 12,50" or "1.234,50" come back null, and only those rows are handed to
+    the Python parser — on a real export that is a few percent of the rows
+    instead of every one of them.
+    """
+    raw = (pl.col(column).cast(pl.Utf8, strict=False).fill_null("")
+           .str.strip_chars())
+    prepared = frame.select([
+        raw.alias("_text"),
+        raw.cast(pl.Float64, strict=False).alias("_value"),
+    ])
+    texts = prepared.get_column("_text")
+    values = prepared.get_column("_value")
+
+    # A null is either "not a plain number" or "empty". Empty is not an error:
+    # it simply means the product is not online.
+    needs_python = values.is_null() & (texts != "")
+    if bool(needs_python.any()):
+        text_list = texts.to_list()
+        number_list = values.to_list()
+        for index in needs_python.arg_true().to_list():
+            parsed, ok = parse_number(text_list[index])
+            number_list[index] = parsed
+            if not ok:
+                counters[column] = counters.get(column, 0) + 1
+        values = pl.Series("_value", number_list, dtype=pl.Float64)
+
+    return values.fill_null(0.0)
 
 
 def missing_rows(online_df: pl.DataFrame, feed_ids: set) -> pl.DataFrame:

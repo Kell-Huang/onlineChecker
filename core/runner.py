@@ -13,13 +13,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 from urllib.parse import urlparse
 
-import polars as pl
-
 from . import compare, feeds as feeds_module
 from .download import download_file
 from .errors import (Cancelled, ConfigError, ExcelError, GosError, TokenError)
 from .models import Feed, Selection
-from .productsup import Client, estimate_request_length
+from .productsup import estimate_request_length, make_client
 from .progress import (PHASE_API, PHASE_COMPARE, PHASE_DOWNLOAD, PHASE_GOS,
                        PHASE_REPORT, Reporter)
 from .redact import redact_token
@@ -85,7 +83,9 @@ def _run(selection: Selection, settings: Settings,
 
     token = require_token(credentials)
     ensure_dirs(settings)
-    _clean_dir(settings.output_dir)
+    # Only the download cache is wiped: it is regenerated every run. The output
+    # directory is not touched, because deleting the previous report meant a
+    # run that failed halfway left the user with nothing at all.
     _clean_dir(CACHE_DIR)
 
     aliases, country_table = load_countries()
@@ -257,7 +257,7 @@ def _query_api(payloads: List[Dict[str, Any]], settings: Settings,
     failed_rows: List[Dict[str, Any]] = []
     total = max(len(payloads), 1)
 
-    with Client(credentials["token"], credentials["base_url"], settings) as client:
+    with make_client(credentials, settings) as client:
         for position, payload in enumerate(payloads):
             if cancel_event.is_set():
                 raise Cancelled()

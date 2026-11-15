@@ -18,7 +18,7 @@ import requests
 
 from .errors import Cancelled, TokenError
 from .redact import redact_token
-from .settings import DEFAULT_BASE_URL, Settings
+from .settings import API_RETRY_BACKOFF, DEFAULT_BASE_URL, Settings
 
 # Fields the stage endpoint must return for the "why was it skipped" report.
 SKIP_FIELDS = ["___skipped_intermediate", "___skipped_export"]
@@ -126,7 +126,7 @@ class Client(StageClient):
         params.append(("limit", "1000"))
 
         max_retries = int(settings.tune("api_max_retries")) if settings else 2
-        backoffs = (2.0, 4.0)
+        backoffs = API_RETRY_BACKOFF
         timeout = settings.api_timeouts if settings else (10, 60)
 
         attempt = 0

@@ -12,22 +12,12 @@ STYLE_PATH = APP_ROOT / "styles" / "main.qss"
 ICON_PATH = ASSETS_DIR / "app_icon.ico"
 ICON_PNG_PATH = ASSETS_DIR / "app_icon_256.png"
 
-TEXT = "#1f2937"
-TEXT_SECONDARY = "#667085"
 TEXT_MUTED = "#98a2b3"
 PRIMARY = "#2f6fed"
 
 SUCCESS = "#0f7b3f"
 WARNING = "#b54708"
 DANGER = "#b42318"
-
-# Summary-cell colours, mirroring the badge palette in main.qss.
-STATUS_STYLES = {
-    "good": ("#e7f6ec", SUCCESS),
-    "warn": ("#fef3e6", WARNING),
-    "bad": ("#fee4e2", DANGER),
-}
-
 
 def load_stylesheet() -> str:
     """Read main.qss and resolve the ``@ASSETS@`` token."""

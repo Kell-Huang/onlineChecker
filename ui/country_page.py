@@ -94,12 +94,12 @@ class CountryPage(QWidget):
         self.tree.setEditTriggers(QAbstractItemView.NoEditTriggers)
         header = self.tree.header()
         header.setStretchLastSection(False)
-        # The name column takes the slack: it is the only one whose content
-        # varies a lot (country codes are short, channel names are not).
-        header.setSectionResizeMode(0, header.ResizeMode.Stretch)
-        header.setSectionResizeMode(1, header.ResizeMode.Interactive)
+        # Site names are the long values, so that column takes the slack. A
+        # stretched name column left a wide gap between the feed and its site.
+        header.setSectionResizeMode(0, header.ResizeMode.Interactive)
+        header.setSectionResizeMode(1, header.ResizeMode.Stretch)
         header.setSectionResizeMode(2, header.ResizeMode.Interactive)
-        self.tree.setColumnWidth(1, 300)
+        self.tree.setColumnWidth(0, 380)
         self.tree.setColumnWidth(2, 150)
         self.tree.itemChanged.connect(self._on_item_changed)
         layout.addWidget(self.tree, stretch=1)

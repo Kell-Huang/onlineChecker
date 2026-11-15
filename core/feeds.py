@@ -86,10 +86,6 @@ def register_reader(feed_format: str, reader) -> None:
     READERS[feed_format.strip().lower()] = reader
 
 
-def supported_formats() -> List[str]:
-    return sorted(READERS)
-
-
 def read_feed_ids(path: Path, feed_format: str) -> Tuple[List[str], Optional[str]]:
     """Return (raw ids, id column name or None when undetectable).
 

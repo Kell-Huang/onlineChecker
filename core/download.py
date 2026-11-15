@@ -17,7 +17,7 @@ import requests
 from .errors import Cancelled
 from .progress import Reporter
 from .redact import redact_token
-from .settings import Settings
+from .settings import DOWNLOAD_RETRY_BACKOFF, Settings
 
 _REPORT_INTERVAL = 2.0
 
@@ -111,7 +111,7 @@ def download_file(url: str, dest: Path, settings: Settings, cancel_event,
             _safe_unlink(part_path)
             last_error = f"{type(exc).__name__}: {exc}"
             if attempt < attempts - 1:
-                wait = min(2.0 * (2 ** attempt), 8.0)
+                wait = DOWNLOAD_RETRY_BACKOFF[min(attempt, len(DOWNLOAD_RETRY_BACKOFF) - 1)]
                 reporter.log(
                     "WARNING",
                     f"{label}Attempt {attempt + 1}/{attempts} failed for {url}: "

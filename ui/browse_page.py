@@ -18,7 +18,6 @@ from core.models import Feed, GosFeed, Selection
 from core.productsup import (channel_is_usable, detect_url_format,
                              extract_feed_url)
 
-from .theme import TEXT_MUTED
 from .workers import MetadataWorker
 
 
@@ -168,6 +167,7 @@ class BrowsePage(QWidget):
             url=url,
             site_name=site_name,
             channel_name=str(channel.get("name") or ""),
+            project_id=str(project_id or ""),
             format=detect_url_format(url),
         )
 
@@ -210,8 +210,7 @@ class BrowsePage(QWidget):
         data = item.data(0, Qt.UserRole) or ()
         if not data or data[0] != "channel":
             return
-        _kind, _key, feed, project_id = data
-        feed.project_id = project_id
+        _kind, _key, feed, _project_id = data
         if not feed.country:
             feed.country = infer_country(feed.site_name, feed.channel_name,
                                          self._aliases, self._countries)
@@ -225,8 +224,7 @@ class BrowsePage(QWidget):
         data = item.data(0, Qt.UserRole) or ()
         if not data or data[0] != "channel":
             return
-        _kind, _key, feed, project_id = data
-        feed.project_id = project_id
+        _kind, _key, feed, _project_id = data
 
         menu = QMenu(self)
         if self._selection.gos and self._selection.gos.key == feed.key:

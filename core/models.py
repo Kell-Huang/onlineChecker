@@ -64,6 +64,7 @@ class Feed:
     url: str
     site_name: str = ""
     channel_name: str = ""
+    project_id: str = ""
     format: str = "csv"
     id_column: Optional[str] = None
     gos_columns: Dict[str, str] = field(default_factory=dict)
@@ -94,6 +95,7 @@ class Feed:
             url=_as_str(data.get("url")),
             site_name=_as_str(data.get("site_name")),
             channel_name=_as_str(data.get("channel_name")),
+            project_id=_as_str(data.get("project_id")),
             format=_as_str(data.get("format")) or "csv",
             id_column=_as_str(data.get("id_column")) or None,
             gos_columns={str(k): _as_str(v) for k, v in columns.items()},
@@ -106,6 +108,7 @@ class Feed:
             "channel_id": self.channel_id,
             "site_name": self.site_name,
             "channel_name": self.channel_name,
+            "project_id": self.project_id,
             "url": self.url,
             "format": self.format,
             "id_column": self.id_column,

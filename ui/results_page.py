@@ -115,7 +115,7 @@ def _cell_text(value: Any) -> str:
 
 def _totals_text(rows: List[Dict[str, Any]]) -> str:
     if not rows:
-        return "No run yet."
+        return "No countries were compared."
     online = sum(int(row.get("gos_count") or 0) for row in rows)
     missing = sum(int(row.get("not_in_channel_count") or 0) for row in rows)
     skipped = sum(int(row.get("skipped_count") or 0) for row in rows)
