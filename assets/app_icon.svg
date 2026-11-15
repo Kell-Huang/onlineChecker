@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>Online Status Checker</title>
+  <desc>A white check mark inside a blue rounded square, with a small amber dot marking a product that is missing.</desc>
+  <rect width="256" height="256" rx="56" fill="#2f6fed"/>
+  <path d="M64 132l38 38 92-96" fill="none" stroke="#ffffff" stroke-width="26"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="196" cy="60" r="18" fill="#f5a623" stroke="#2f6fed" stroke-width="7"/>
+</svg>

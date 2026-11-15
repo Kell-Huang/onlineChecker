@@ -1,0 +1,6 @@
+{
+  "output_dir": "output",
+  "max_per_country": 1000,
+  "random_seed": 42,
+  "download_concurrency": 5
+}

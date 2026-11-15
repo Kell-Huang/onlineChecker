@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.cache/
+output/
+logs/
+*.xlsx
+.pytest_cache/
+config_backup/
+.workbuddy-ai/

@@ -1,0 +1,560 @@
+{
+  "version": 2,
+  "gos": {
+    "site_id": "1092691",
+    "channel_id": "396404",
+    "site_name": "Report - SFCC B2C Online Products - BI",
+    "channel_name": "Report - SFCC Online Product Check Simple/Child",
+    "url": "https://transport.productsup.io/f68c905c518238c204e1/channel/396404/sfcc_localized_online_check_global.csv",
+    "format": "csv",
+    "id_column": "id"
+  },
+  "feeds": [
+    {
+      "country": "ae-ar",
+      "site_id": "1094255",
+      "channel_id": "561189",
+      "site_name": "vidaXL.UAE-AR (Acceptance)",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/b4a344d183ea8a0600f0/channel/561189/google_shopping_uae_ar.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_ar_ae",
+        "stock": "bb_stock_ae_ar",
+        "price": "bb_price_ae_ar"
+      }
+    },
+    {
+      "country": "fr",
+      "site_id": "355131",
+      "channel_id": "268134",
+      "site_name": "vidaxl.fr",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/48ab79321df6c10b2211/channel/268134/googler_merchant_fr_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_fr_fr",
+        "stock": "bb_stock_fr",
+        "price": "bb_price_fr"
+      }
+    },
+    {
+      "country": "nl",
+      "site_id": "357626",
+      "channel_id": "268128",
+      "site_name": "vidaXL.nl",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/cf7871c3eb59dc3fd0e5/channel/268128/googler_merchant_nl_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_nl_nl",
+        "stock": "bb_stock_nl",
+        "price": "bb_price_nl"
+      }
+    },
+    {
+      "country": "si",
+      "site_id": "357642",
+      "channel_id": "467030",
+      "site_name": "vidaXL.si",
+      "channel_name": "Google Merchant Center  (Back Up)",
+      "url": "https://transport.productsup.io/9116925bbb8c92887cae/channel/467030/vidaXL_si_Google_shopping_back_up.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_sl_si",
+        "stock": "bb_stock_si",
+        "price": "bb_price_si"
+      }
+    },
+    {
+      "country": "pt",
+      "site_id": "357643",
+      "channel_id": "268123",
+      "site_name": "vidaXL.pt",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/3ae5497075215d3afaf1/channel/268123/googler_merchant_pt_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_pt_pt",
+        "stock": "bb_stock_pt",
+        "price": "bb_price_pt"
+      }
+    },
+    {
+      "country": "ie",
+      "site_id": "357770",
+      "channel_id": "268129",
+      "site_name": "vidaXL.ie",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/f7fb4926fed0c7dc291b/channel/268129/googler_merchant_ie_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_en_ie",
+        "stock": "bb_stock_ie",
+        "price": "bb_price_ie"
+      }
+    },
+    {
+      "country": "at",
+      "site_id": "357781",
+      "channel_id": "268151",
+      "site_name": "vidaXL.at",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/9e92912654ad834d7822/channel/268151/googler_merchant_at_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_de_at",
+        "stock": "bb_stock_at",
+        "price": "bb_price_at"
+      }
+    },
+    {
+      "country": "au",
+      "site_id": "357795",
+      "channel_id": "268150",
+      "site_name": "vidaXL.com.au",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/b1565d67ca14cebf617c/channel/268150/googler_merchant_au_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_en_au",
+        "stock": "bb_stock_au",
+        "price": "bb_price_au"
+      }
+    },
+    {
+      "country": "pl",
+      "site_id": "357805",
+      "channel_id": "268125",
+      "site_name": "vidaXL.pl",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/d2fc87189709ca0590a6/channel/268125/googler_merchant_pl_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_pl_pl",
+        "stock": "bb_stock_pl",
+        "price": "bb_price_pl"
+      }
+    },
+    {
+      "country": "ch-fr",
+      "site_id": "358214",
+      "channel_id": "268152",
+      "site_name": "vidaXL.ch",
+      "channel_name": "Google Merchant Center CH-FR back up",
+      "url": "https://transport.productsup.io/e9ba40e8e3597b1588a0/channel/268152/googler_merchant_ch_fr_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_fr_ch",
+        "stock": "bb_stock_ch_fr",
+        "price": "bb_price_ch_fr"
+      }
+    },
+    {
+      "country": "ch-de",
+      "site_id": "358214",
+      "channel_id": "405973",
+      "site_name": "vidaXL.ch",
+      "channel_name": "Google Merchant Center ch-de (New Test)",
+      "url": "https://transport.productsup.io/e9ba40e8e3597b1588a0/channel/405973/google_shopping_ch_de.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_de_ch",
+        "stock": "bb_stock_ch_de",
+        "price": "bb_price_ch_de"
+      }
+    },
+    {
+      "country": "uk",
+      "site_id": "358230",
+      "channel_id": "406437",
+      "site_name": "vidaXL.co.uk",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/4f373569130aa7bb51c5/channel/406437/google_shopping_UK.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_en_gb",
+        "stock": "bb_stock_uk",
+        "price": "bb_price_uk"
+      }
+    },
+    {
+      "country": "sk",
+      "site_id": "358316",
+      "channel_id": "268115",
+      "site_name": "vidaXL.sk",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/6651a3e97d339f544a23/channel/268115/googler_merchant_sk_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_sk_sk",
+        "stock": "bb_stock_sk",
+        "price": "bb_price_sk"
+      }
+    },
+    {
+      "country": "bg",
+      "site_id": "358441",
+      "channel_id": "194575",
+      "site_name": "vidaXL.bg",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/460dae360c319251a1f2/channel/194575/vidaXL_bg_Google_shopping.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_bg_bg",
+        "stock": "bb_stock_bg",
+        "price": "bb_price_bg"
+      }
+    },
+    {
+      "country": "be-fr",
+      "site_id": "358443",
+      "channel_id": "268157",
+      "site_name": "vidaXL.be",
+      "channel_name": "Google Merchant Center BE-FR back up",
+      "url": "https://transport.productsup.io/beb10746e58fc0fa8ef8/channel/268157/googler_merchant_be_fr_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_fr_be",
+        "stock": "bb_stock_be_fr",
+        "price": "bb_price_be_fr"
+      }
+    },
+    {
+      "country": "be-nl",
+      "site_id": "358443",
+      "channel_id": "268156",
+      "site_name": "vidaXL.be",
+      "channel_name": "Google Merchant Center BE-NL back up",
+      "url": "https://transport.productsup.io/beb10746e58fc0fa8ef8/channel/268156/googler_merchant_be_nl_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_nl_be",
+        "stock": "bb_stock_be_nl",
+        "price": "bb_price_be_nl"
+      }
+    },
+    {
+      "country": "de",
+      "site_id": "358442",
+      "channel_id": "268145",
+      "site_name": "vidaXL.de",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/8227eda6a7fa10d0d996/channel/268145/googler_merchant_de_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_de_de",
+        "stock": "bb_stock_de",
+        "price": "bb_price_de"
+      }
+    },
+    {
+      "country": "se",
+      "site_id": "358444",
+      "channel_id": "268116",
+      "site_name": "vidaXL.se",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/fca2664692a2f654afd0/channel/268116/googler_merchant_se_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_sv_se",
+        "stock": "bb_stock_se",
+        "price": "bb_price_se"
+      }
+    },
+    {
+      "country": "cz",
+      "site_id": "358448",
+      "channel_id": "268147",
+      "site_name": "vidaxl.cz",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/5d371734fbb1a91a8253/channel/268147/googler_merchant_cz_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_cs_cz",
+        "stock": "bb_stock_cz",
+        "price": "bb_price_cz"
+      }
+    },
+    {
+      "country": "dk",
+      "site_id": "358570",
+      "channel_id": "268140",
+      "site_name": "vidaXL.dk",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/de8254c69e698a08e904/channel/268140/googler_merchant_dk_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_da_dk",
+        "stock": "bb_stock_dk",
+        "price": "bb_price_dk"
+      }
+    },
+    {
+      "country": "ro",
+      "site_id": "364791",
+      "channel_id": "268119",
+      "site_name": "vidaXL.ro",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/b6ba4135929198a068a9/channel/268119/googler_merchant_ro_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_ro_ro",
+        "stock": "bb_stock_ro",
+        "price": "bb_price_ro"
+      }
+    },
+    {
+      "country": "lv",
+      "site_id": "364797",
+      "channel_id": "497243",
+      "site_name": "vidaXL.lv",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/f64b98ba93ceeefb8418/channel/497243/google_shopping_lv.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_lv_lv",
+        "stock": "bb_stock_lv",
+        "price": "bb_price_lv"
+      }
+    },
+    {
+      "country": "lt",
+      "site_id": "364798",
+      "channel_id": "497242",
+      "site_name": "vidaXL.lt",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/ea90965b409295177e8d/channel/497242/google_shopping_lt.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_lt_lt",
+        "stock": "bb_stock_lt",
+        "price": "bb_price_lt"
+      }
+    },
+    {
+      "country": "no",
+      "site_id": "365220",
+      "channel_id": "268127",
+      "site_name": "vidaXL.no",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/292c03b1c8daf8e11913/channel/268127/googler_merchant_no_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_nb_no",
+        "stock": "bb_stock_no",
+        "price": "bb_price_no"
+      }
+    },
+    {
+      "country": "fi",
+      "site_id": "366510",
+      "channel_id": "268136",
+      "site_name": "vidaXL.fi",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/ca19bd84b792df4ba57a/channel/268136/googler_merchant_fi_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_fi_fi",
+        "stock": "bb_stock_fi",
+        "price": "bb_price_fi"
+      }
+    },
+    {
+      "country": "gr",
+      "site_id": "366659",
+      "channel_id": "268133",
+      "site_name": "vidaXL.gr",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/f500c29c85ad4b7d500c/channel/268133/googler_merchant_gr_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_el_gr",
+        "stock": "bb_stock_gr",
+        "price": "bb_price_gr"
+      }
+    },
+    {
+      "country": "it",
+      "site_id": "367774",
+      "channel_id": "411638",
+      "site_name": "vidaXL.it",
+      "channel_name": "Google Merchant Center(New Test)",
+      "url": "https://transport.productsup.io/bd06690795dfeb1b0f28/channel/411638/google_shopping_it.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_it_it",
+        "stock": "bb_stock_it",
+        "price": "bb_price_it"
+      }
+    },
+    {
+      "country": "es",
+      "site_id": "367788",
+      "channel_id": "268137",
+      "site_name": "vidaXL.es",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/7947c7becca20572b9b6/channel/268137/googler_merchant_es_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_es_es",
+        "stock": "bb_stock_es",
+        "price": "bb_price_es"
+      }
+    },
+    {
+      "country": "ee",
+      "site_id": "368114",
+      "channel_id": "281267",
+      "site_name": "vidaXL.ee",
+      "channel_name": "Google Shopping (hinnavordlus)",
+      "url": "https://transport.productsup.io/a5ee3ec8cb8b96527314/channel/281267/vidaXL_EE_Google_Shopping.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_et_ee",
+        "stock": "bb_stock_ee",
+        "price": "bb_price_ee"
+      }
+    },
+    {
+      "country": "hr",
+      "site_id": "380957",
+      "channel_id": "194577",
+      "site_name": "vidaXL.hr",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/77b598618c840f97d89a/channel/194577/vidaXL_hr_Google_shopping.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_hr_hr",
+        "stock": "bb_stock_hr",
+        "price": "bb_price_hr"
+      }
+    },
+    {
+      "country": "hu",
+      "site_id": "380958",
+      "channel_id": "268132",
+      "site_name": "vidaXL.hu",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/642816fd3f155760666d/channel/268132/googler_merchant_hu_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_hu_hu",
+        "stock": "bb_stock_hu",
+        "price": "bb_price_hu"
+      }
+    },
+    {
+      "country": "us",
+      "site_id": "435134",
+      "channel_id": "268073",
+      "site_name": "vidaXL.us",
+      "channel_name": "Google Merchant Center back up",
+      "url": "https://transport.productsup.io/d88ebe68f8d10ecf2704/channel/268073/googler_merchant_us_back_up.xml",
+      "format": "xml",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_en_us",
+        "stock": "bb_stock_us",
+        "price": "bb_price_us"
+      }
+    },
+    {
+      "country": "ae-en",
+      "site_id": "1094254",
+      "channel_id": "413649",
+      "site_name": "vidaXL.UAE-EN (Acceptance)",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/2a1752e786e74179c922/channel/413649/google_shopping_uae_en.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_en_ae",
+        "stock": "bb_stock_ae",
+        "price": "bb_price_ae"
+      }
+    },
+    {
+      "country": "jp",
+      "site_id": "1100193",
+      "channel_id": "451644",
+      "site_name": "vidaXL.JP (Acceptance)",
+      "channel_name": "Google Merchant Center",
+      "url": "https://transport.productsup.io/2c8af1107891e85a1be9/channel/451644/google_shopping_jp.csv",
+      "format": "csv",
+      "id_column": "id",
+      "gos_columns": {
+        "online": "ca_online_ja_jp",
+        "stock": "bb_stock_jp",
+        "price": "bb_price_jp"
+      }
+    }
+  ],
+  "selected": [
+    "1094255/561189",
+    "355131/268134",
+    "357626/268128",
+    "357642/467030",
+    "357643/268123",
+    "357770/268129",
+    "357781/268151",
+    "357795/268150",
+    "357805/268125",
+    "358214/268152",
+    "358214/405973",
+    "358230/406437",
+    "358316/268115",
+    "358441/194575",
+    "358443/268157",
+    "358443/268156",
+    "358442/268145",
+    "358444/268116",
+    "358448/268147",
+    "358570/268140",
+    "364791/268119",
+    "364797/497243",
+    "364798/497242",
+    "365220/268127",
+    "366510/268136",
+    "366659/268133",
+    "367774/411638",
+    "367788/268137",
+    "368114/281267",
+    "380957/194577",
+    "380958/268132",
+    "435134/268073",
+    "1094254/413649",
+    "1100193/451644"
+  ]
+}
