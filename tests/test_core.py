@@ -38,8 +38,12 @@ def test_settings_file_is_written_with_defaults_on_first_run(config_dir):
     assert loaded.max_per_country == 1000
     written = json.loads((config_dir / "settings.json").read_text(encoding="utf-8"))
     # Four keys, flat. No nested sections, no tuning values.
-    assert set(written) == {"output_dir", "max_per_country", "random_seed",
+    assert set(written) == {"output_dir", "max_per_country", "sample_seed",
                             "download_concurrency"}
+    # A fresh seed every run by default: re-checking the same thousand SKUs
+    # every time is the thing this setting exists to avoid.
+    assert written["sample_seed"] == "random"
+    assert loaded.random_seed is None
 
 
 def test_settings_advanced_block_is_optional(config_dir):
@@ -51,6 +55,24 @@ def test_settings_advanced_block_is_optional(config_dir):
     assert loaded.api_batch_size == 50
     # Untouched keys still fall back to the code constants.
     assert loaded.api_interval == settings_module.API_BATCH_INTERVAL
+
+
+def test_a_pinned_seed_round_trips(config_dir):
+    (config_dir / "settings.json").write_text(
+        json.dumps({"output_dir": "out", "sample_seed": 42}), encoding="utf-8")
+    loaded = settings_module.load_settings()
+    assert loaded.random_seed == 42
+
+    settings_module.save_settings(loaded)
+    written = json.loads((config_dir / "settings.json").read_text(encoding="utf-8"))
+    assert written["sample_seed"] == 42
+
+
+def test_garbage_seed_falls_back_to_random(config_dir):
+    (config_dir / "settings.json").write_text(
+        json.dumps({"output_dir": "out", "sample_seed": "whatever"}),
+        encoding="utf-8")
+    assert settings_module.load_settings().random_seed is None
 
 
 def test_legacy_session_is_migrated_once(config_dir):

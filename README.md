@@ -45,10 +45,15 @@ Four files, three of which you might open:
 
 | File | Who writes it | What is in it |
 |---|---|---|
-| `config/settings.json` | you | four keys: `output_dir`, `max_per_country`, `random_seed`, `download_concurrency` |
+| `config/settings.json` | you | four keys: `output_dir`, `max_per_country`, `sample_seed`, `download_concurrency` |
 | `config/countries.json` | you | country code → the three GOS column names, plus aliases |
 | `config/selection.json` | the app | GOS channel, every configured feed, and the ticked subset |
 | `config/credentials.json` | you | the Productsup token |
+
+`sample_seed` is `"random"` by default: each run draws a fresh seed, so
+repeated runs check different SKUs. Set it to a number to pin the sample —
+the run log always prints the seed it used, so a report can be reproduced by
+copying that number back.
 
 Timeouts, retry counts, batch sizes and chunk sizes are constants in
 `core/settings.py`. They are not in the file because they were never meant to

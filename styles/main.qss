@@ -136,6 +136,15 @@ QLineEdit:focus, QSpinBox:focus {
     border-color: #2f6fed;
 }
 
+/* Disabled inputs must look inactive: the base rule sets an explicit colour,
+   which otherwise wins over the platform's greyed-out rendering. */
+QLineEdit:disabled,
+QSpinBox:disabled {
+    background-color: #f9fafb;
+    color: #b9c0ca;
+    border-color: #eceff3;
+}
+
 QLineEdit#searchEdit {
     max-width: 320px;
 }

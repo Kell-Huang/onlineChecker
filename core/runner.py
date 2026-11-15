@@ -4,6 +4,7 @@ This is the only place that knows the order of operations. Everything it calls
 is a pure function or a small client, which keeps the orchestration readable
 and lets each step be tested on its own.
 """
+import secrets
 import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -265,8 +266,9 @@ def _query_api(payloads: List[Dict[str, Any]], settings: Settings,
             feed: Feed = payload["feed"]
             country = feed.country or f"feed_{position}"
             missing_df = payload["missing_df"]
+            seed = _run_seed(settings, reporter)
             sampled = compare.sample_skus(
-                missing_df, settings.max_per_country, settings.random_seed)
+                missing_df, settings.max_per_country, seed)
 
             returned: Dict[str, Dict[str, Any]] = {}
             covered: set = set()
@@ -446,6 +448,24 @@ def format_skip_reason(export_raw: str, intermediate_raw: str) -> Tuple[str, str
             else:
                 parts.append(item)
     return "; ".join(parts), (str(min(priorities)) if priorities else "")
+
+
+def _run_seed(settings: Settings, reporter: Reporter) -> int:
+    """The seed used for this run.
+
+    A fixed seed in the settings wins, so a report can be reproduced exactly.
+    Otherwise a fresh one is drawn and logged — without that line there would
+    be no way to re-create a sample that looked wrong.
+    """
+    if settings.random_seed is not None:
+        return settings.random_seed
+    seed = secrets.randbelow(2 ** 31)
+    reporter.log(
+        "INFO",
+        f"Sample seed for this run: {seed} "
+        f"(put it in settings.json as \"sample_seed\" to reproduce)",
+    )
+    return seed
 
 
 def _blank_row(country: str, note: str) -> Dict[str, Any]:

@@ -213,3 +213,51 @@ def test_cancellation_returns_cleanly(fake_server, workspace):
                         Reporter(), event)
     assert result.cancelled
     assert not result.success
+
+
+def _detail_skus(path) -> list:
+    """SKUs from the Sampled Details sheet, in report order."""
+    from openpyxl import load_workbook
+
+    sheet = load_workbook(path)["Sampled Details"]
+    header = [cell.value for cell in sheet[1]]
+    sku_index = header.index("sku")
+    country_index = header.index("country")
+    return [(row[country_index], row[sku_index])
+            for row in sheet.iter_rows(min_row=2, values_only=True)]
+
+
+def test_a_pinned_seed_reproduces_the_sample(fake_server, workspace):
+    """Same seed, same SKUs — that is what makes a report reproducible."""
+    settings = Settings(output_dir=workspace, max_per_country=2,
+                        random_seed=7, download_concurrency=2)
+    credentials = {"token": "test-token", "base_url": fake_server}
+
+    first = runner.run(_selection(fake_server), settings, credentials,
+                       Reporter(), threading.Event())
+    second = runner.run(_selection(fake_server), settings, credentials,
+                        Reporter(), threading.Event())
+
+    assert first.success and second.success
+    assert _detail_skus(first.output_path) == _detail_skus(second.output_path)
+    # Two of the three missing SKUs per country, not all three.
+    assert len(_detail_skus(first.output_path)) == 4
+
+
+def test_a_random_seed_is_drawn_and_logged(fake_server, workspace):
+    """With no pinned seed the run picks one and says which, so it can be replayed."""
+    lines = []
+    settings = Settings(output_dir=workspace, max_per_country=2,
+                        random_seed=None, download_concurrency=2)
+    credentials = {"token": "test-token", "base_url": fake_server}
+
+    result = runner.run(_selection(fake_server), settings, credentials,
+                        Reporter(log_callback=lambda level, msg: lines.append(msg)),
+                        threading.Event())
+
+    assert result.success, result.error
+    seed_lines = [line for line in lines if "Sample seed for this run" in line]
+    assert len(seed_lines) == 2          # one per country
+    for line in seed_lines:
+        number = line.split("Sample seed for this run:")[1].split()[0]
+        assert number.isdigit()

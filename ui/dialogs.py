@@ -5,12 +5,12 @@ text away from the icon, which is why the app draws its own: a line glyph on a
 tinted badge, a title over a body, and an explicit primary/secondary button
 hierarchy.
 """
-from typing import Tuple
+from typing import Optional, Tuple
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
-    QPushButton, QSizePolicy, QSpinBox, QVBoxLayout,
+    QCheckBox, QDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
+    QMessageBox, QPushButton, QSizePolicy, QSpinBox, QVBoxLayout,
 )
 
 from core.settings import Settings
@@ -175,10 +175,25 @@ class SettingsDialog(QDialog):
         self.concurrency_spin.setValue(settings.download_concurrency)
         form.addRow("Parallel downloads", self.concurrency_spin)
 
+        # Sampling: a fresh seed every run by default, so repeated runs check
+        # different SKUs instead of the same thousand. Pinning a seed is only
+        # for reproducing a report.
+        self.random_sample_check = QCheckBox("Pick a different sample each run")
+        self.random_sample_check.setChecked(settings.random_seed is None)
+        self.random_sample_check.toggled.connect(
+            lambda checked: self.seed_spin.setEnabled(not checked))
+        form.addRow("Sampling", self.random_sample_check)
+
         self.seed_spin = QSpinBox()
-        self.seed_spin.setRange(0, 999_999)
-        self.seed_spin.setValue(settings.random_seed)
-        form.addRow("Sampling seed", self.seed_spin)
+        self.seed_spin.setRange(0, 2_147_483_647)
+        self.seed_spin.setValue(settings.random_seed
+                                if settings.random_seed is not None else 42)
+        self.seed_spin.setEnabled(settings.random_seed is not None)
+        self.seed_spin.setToolTip(
+            "Only used when the sample is pinned; copy it from the log to "
+            "reproduce a run."
+        )
+        form.addRow("Fixed seed", self.seed_spin)
 
         layout.addLayout(form)
 
@@ -195,11 +210,11 @@ class SettingsDialog(QDialog):
         row.addWidget(save)
         layout.addLayout(row)
 
-    def values(self) -> Tuple[str, str, int, int, int]:
+    def values(self) -> Tuple[str, str, int, int, Optional[int]]:
         return (
             self.token_edit.text().strip(),
             self.output_edit.text().strip(),
             self.max_spin.value(),
             self.concurrency_spin.value(),
-            self.seed_spin.value(),
+            None if self.random_sample_check.isChecked() else self.seed_spin.value(),
         )

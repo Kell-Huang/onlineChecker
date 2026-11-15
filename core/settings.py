@@ -1,7 +1,7 @@
 """Configuration: three small files, plus one secret.
 
     config/credentials.json   {"token": "..."}                     (never commit)
-    config/settings.json      four keys you might actually change
+    config/settings.json      the few keys you might actually change
     config/countries.json     country -> GOS column names
     config/selection.json     written by the app: GOS + feeds + ticked subset
 
@@ -66,10 +66,15 @@ ADVANCED_DEFAULTS: Dict[str, Any] = {
     "download_chunk_bytes": DOWNLOAD_CHUNK_BYTES,
 }
 
+# "random" means: draw a fresh seed for every run, so repeated runs cover
+# different SKUs instead of re-checking the same thousand. A number pins the
+# sample, which is what you want when reproducing a report.
+RANDOM_SEED = "random"
+
 DEFAULT_SETTINGS: Dict[str, Any] = {
     "output_dir": "output",
     "max_per_country": 1000,
-    "random_seed": 42,
+    "sample_seed": RANDOM_SEED,
     "download_concurrency": 5,
 }
 
@@ -79,7 +84,7 @@ class Settings:
     """The four settings a user may change, plus optional overrides."""
     output_dir: Path
     max_per_country: int = 1000
-    random_seed: int = 42
+    random_seed: Optional[int] = None      # None = a fresh seed every run
     download_concurrency: int = 5
     advanced: Dict[str, Any] = field(default_factory=dict)
 
@@ -162,10 +167,25 @@ def load_settings(create: bool = True) -> Settings:
     return Settings(
         output_dir=output_dir,
         max_per_country=int(data.get("max_per_country", 1000)),
-        random_seed=int(data.get("random_seed", 42)),
+        random_seed=_parse_seed(data.get("sample_seed", RANDOM_SEED)),
         download_concurrency=max(1, int(data.get("download_concurrency", 5))),
         advanced=dict(advanced) if isinstance(advanced, dict) else {},
     )
+
+
+def _parse_seed(value: Any) -> Optional[int]:
+    """'random' / missing / garbage -> None (fresh seed each run)."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    text = str(value or "").strip().lower()
+    if text in ("", "random", "auto", "none"):
+        return None
+    try:
+        return int(text)
+    except ValueError:
+        return None
 
 
 def save_settings(settings: Settings) -> None:
@@ -175,7 +195,8 @@ def save_settings(settings: Settings) -> None:
     except ValueError:
         data["output_dir"] = str(settings.output_dir)
     data["max_per_country"] = settings.max_per_country
-    data["random_seed"] = settings.random_seed
+    data["sample_seed"] = (settings.random_seed
+                           if settings.random_seed is not None else RANDOM_SEED)
     data["download_concurrency"] = settings.download_concurrency
     if settings.advanced:
         data["advanced"] = settings.advanced
