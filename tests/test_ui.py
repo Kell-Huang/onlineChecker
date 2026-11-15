@@ -81,7 +81,8 @@ def test_country_page_groups_feeds_under_countries():
     page.deleteLater()
 
 
-def test_select_none_clears_every_feed():
+def test_header_checkbox_clears_and_reselects_everything():
+    """The header is the only bulk control: one click clears, the next selects."""
     _app()
     from ui.country_page import CountryPage
 
@@ -90,11 +91,34 @@ def test_select_none_clears_every_feed():
     emitted = []
     page.selection_changed.connect(lambda: emitted.append(True))
 
-    page.select_none_btn.click()
+    assert page.header.check_state() == Qt.Checked
+
+    page.header.toggled.emit()
 
     assert page.selected_keys() == []
     assert _country(page, "uk").checkState(0) == Qt.Unchecked
+    assert page.header.check_state() == Qt.Unchecked
     assert emitted, "the page must tell the window to persist"
+
+    page.header.toggled.emit()
+    assert page.selected_keys() == ["2/10", "2/11", "3/12"]
+    assert page.header.check_state() == Qt.Checked
+    page.deleteLater()
+
+
+def test_header_shows_the_indeterminate_state():
+    _app()
+    from ui.country_page import CountryPage
+
+    page = CountryPage()
+    page.set_selection(_selection(), COUNTRIES)
+    _country(page, "uk").child(0).setCheckState(0, Qt.Unchecked)
+
+    assert page.header.check_state() == Qt.PartiallyChecked
+
+    # A click on a partial header selects the rest rather than clearing it.
+    page.header.toggled.emit()
+    assert page.selected_keys() == ["2/10", "2/11", "3/12"]
     page.deleteLater()
 
 
@@ -129,7 +153,7 @@ def test_ticking_a_country_ticks_all_of_its_feeds():
     page.deleteLater()
 
 
-def test_bulk_actions_only_touch_visible_rows():
+def test_header_only_touches_visible_rows():
     _app()
     from ui.country_page import CountryPage
 
@@ -137,23 +161,33 @@ def test_bulk_actions_only_touch_visible_rows():
     page.set_selection(_selection(), COUNTRIES)
     page.search_edit.setText("uk")
 
-    page.select_none_btn.click()
+    # The header reflects what is on screen, not the whole selection.
+    assert page.header.check_state() == Qt.Checked
+    page.header.toggled.emit()
 
     # "de" was filtered out, so its feed keeps its tick.
     assert page.selected_keys() == ["3/12"]
+    assert page.header.check_state() == Qt.Unchecked
     page.deleteLater()
 
 
-def test_invert_flips_the_visible_rows():
+def test_header_checkbox_sits_inside_the_first_section():
     _app()
+    from PySide6.QtCore import QRect
+
     from ui.country_page import CountryPage
 
     page = CountryPage()
     page.set_selection(_selection(), COUNTRIES)
-    page.select_none_btn.click()
-    page.invert_btn.click()
+    page.resize(900, 600)
+    page.show()
+    _app().processEvents()
 
-    assert page.selected_keys() == ["2/10", "2/11", "3/12"]
+    header = page.header
+    section = QRect(header.sectionViewportPosition(0), 0,
+                    header.sectionSize(0), header.height())
+    box = header._box_rect(section)
+    assert section.contains(box), (section, box)
     page.deleteLater()
 
 
@@ -235,6 +269,6 @@ def test_main_window_builds_with_four_tabs(tmp_path, monkeypatch):
             "Countries", "Browse", "Results", "Log",
         ]
         assert not window.start_btn.isEnabled()      # nothing selected yet
-        assert "0 of 0 feeds" in window.summary_label.text()
+        assert window.summary_label.text().startswith("GOS:")
     finally:
         window.deleteLater()

@@ -10,8 +10,8 @@ This page is flat and country-first:
   - one row per country, one child row per feed (a country may have several);
   - ticking a country ticks all of its feeds, and a country shows the
     indeterminate state when only some of its feeds are ticked;
-  - "Select none" / "Select all" / "Invert" act on the rows currently visible,
-    so a search narrows what the bulk action touches;
+  - the header checkbox is the only bulk control: it shows whether everything
+    visible is ticked and toggles it, so a search narrows what it touches;
   - every change is persisted immediately by the owner.
 
 Feeds are only listed from the saved selection: the page never calls the API,
@@ -19,17 +19,107 @@ which is what makes it usable before a token is even configured.
 """
 from typing import Dict, List
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor
+from PySide6.QtCore import QRect, QSize, Qt, Signal
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (
-    QAbstractItemView, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
+    QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QStyle,
+    QStyleOptionHeader, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
 from core.compare import country_columns_for
 from core.models import Feed, Selection
 
 from .theme import DANGER, SUCCESS, WARNING
+
+
+class CheckableHeader(QHeaderView):
+    """A tree header whose first section carries a tri-state checkbox.
+
+    Clicking it toggles every *visible* row, which is the same scope the
+    removed Select all / Select none buttons had — but the control now shows
+    the current state as well as changing it, and there is one of it instead
+    of three.
+    """
+
+    toggled = Signal()
+
+    _BOX = 14
+    _PAD = 6
+
+    def __init__(self, orientation, parent=None):
+        super().__init__(orientation, parent)
+        self.setSectionsClickable(True)
+        self.setHighlightSections(False)
+        self._state = Qt.Unchecked
+        self.setToolTip("Select or clear every visible row")
+
+    def set_check_state(self, state) -> None:
+        if state != self._state:
+            self._state = state
+            self.viewport().update()
+
+    def check_state(self):
+        return self._state
+
+    def _box_rect(self, section_rect: QRect) -> QRect:
+        return QRect(
+            section_rect.left() + self._PAD,
+            section_rect.top() + (section_rect.height() - self._BOX) // 2,
+            self._BOX,
+            self._BOX,
+        )
+
+    def paintSection(self, painter: QPainter, rect: QRect, logical_index: int) -> None:
+        if logical_index != 0:
+            super().paintSection(painter, rect, logical_index)
+            return
+
+        painter.save()
+        option = QStyleOptionHeader()
+        self.initStyleOption(option)
+        option.rect = rect
+        self.style().drawControl(QStyle.CE_Header, option, painter, self)
+
+        self._paint_box(painter, self._box_rect(rect))
+        title = self.model().headerData(0, Qt.Horizontal) or ""
+        painter.setPen(QColor("#667085"))
+        painter.drawText(rect.adjusted(self._BOX + self._PAD * 2, 0, 0, 0),
+                         Qt.AlignLeft | Qt.AlignVCenter, str(title))
+        painter.restore()
+
+    def _paint_box(self, painter: QPainter, box: QRect) -> None:
+        painter.setRenderHint(QPainter.Antialiasing, True)
+        checked = self._state != Qt.Unchecked
+        painter.setPen(QPen(QColor("#2f6fed" if checked else "#d0d5dd"), 1))
+        painter.setBrush(QColor("#2f6fed" if checked else "#ffffff"))
+        painter.drawRoundedRect(box.adjusted(0, 0, -1, -1), 4, 4)
+
+        if self._state == Qt.Checked:
+            path = QPainterPath()
+            path.moveTo(box.left() + 3.4, box.center().y() + 0.2)
+            path.lineTo(box.left() + 5.9, box.center().y() + 2.8)
+            path.lineTo(box.left() + 10.8, box.center().y() - 2.6)
+            painter.setPen(QPen(QColor("#ffffff"), 1.8, Qt.SolidLine,
+                                Qt.RoundCap, Qt.RoundJoin))
+            painter.setBrush(Qt.NoBrush)
+            painter.drawPath(path)
+        elif self._state == Qt.PartiallyChecked:
+            painter.setPen(QPen(QColor("#ffffff"), 1.8, Qt.SolidLine, Qt.RoundCap))
+            painter.drawLine(box.left() + 3, box.center().y(),
+                             box.right() - 3, box.center().y())
+
+    def mousePressEvent(self, event) -> None:
+        if event.button() == Qt.LeftButton:
+            rect = QRect(self.sectionViewportPosition(0), 0,
+                         self.sectionSize(0), self.height())
+            if self._box_rect(rect).adjusted(-4, -4, 4, 4).contains(event.pos()):
+                self.toggled.emit()
+                return
+        super().mousePressEvent(event)
+
+    def sizeHint(self) -> QSize:
+        size = super().sizeHint()
+        return QSize(size.width() + self._BOX + self._PAD, size.height())
 
 
 class CountryPage(QWidget):
@@ -57,21 +147,8 @@ class CountryPage(QWidget):
         bar = QHBoxLayout()
         bar.setSpacing(8)
 
-        self.select_none_btn = QPushButton("Select none")
-        self.select_none_btn.setObjectName("secondaryButton")
-        self.select_none_btn.clicked.connect(lambda: self._bulk(False))
-        bar.addWidget(self.select_none_btn)
-
-        self.select_all_btn = QPushButton("Select all")
-        self.select_all_btn.setObjectName("secondaryButton")
-        self.select_all_btn.clicked.connect(lambda: self._bulk(True))
-        bar.addWidget(self.select_all_btn)
-
-        self.invert_btn = QPushButton("Invert")
-        self.invert_btn.setObjectName("secondaryButton")
-        self.invert_btn.clicked.connect(self._invert)
-        bar.addWidget(self.invert_btn)
-
+        # No Select all / none buttons: the header checkbox owns both, and it
+        # shows the state as well as changing it.
         self.search_edit = QLineEdit()
         self.search_edit.setObjectName("searchEdit")
         self.search_edit.setPlaceholderText("Filter country or feed…")
@@ -86,6 +163,9 @@ class CountryPage(QWidget):
 
         self.tree = QTreeWidget()
         self.tree.setObjectName("countryTree")
+        self.header = CheckableHeader(Qt.Horizontal, self.tree)
+        self.header.toggled.connect(self._toggle_visible)
+        self.tree.setHeader(self.header)
         self.tree.setColumnCount(3)
         self.tree.setHeaderLabels(["Country / Feed", "Site", "Status"])
         self.tree.setRootIsDecorated(True)
@@ -164,6 +244,7 @@ class CountryPage(QWidget):
 
         self._updating = False
         self._update_count()
+        self._update_header_state()
         self.empty_label.setVisible(not self._selection.feeds)
         self.tree.setVisible(bool(self._selection.feeds))
         self._apply_filter(self.search_edit.text())
@@ -197,6 +278,7 @@ class CountryPage(QWidget):
 
         self._sync_selection()
         self._update_count()
+        self._update_header_state()
         self.selection_changed.emit()
 
     def _sync_selection(self) -> None:
@@ -230,30 +312,36 @@ class CountryPage(QWidget):
             self._updating = False
         self._sync_selection()
         self._update_count()
+        self._update_header_state()
         self.selection_changed.emit()
 
-    def _invert(self) -> None:
-        self._updating = True
-        try:
-            for index in range(self.tree.topLevelItemCount()):
-                country_item = self.tree.topLevelItem(index)
-                if country_item.isHidden():
+    def _toggle_visible(self) -> None:
+        """Header click: clear when everything visible is ticked, else select."""
+        self._bulk(self.header.check_state() != Qt.Checked)
+
+    def _update_header_state(self) -> None:
+        """Header checkbox reflects the visible rows only."""
+        total = 0
+        ticked = 0
+        for index in range(self.tree.topLevelItemCount()):
+            country_item = self.tree.topLevelItem(index)
+            if country_item.isHidden():
+                continue
+            for child_index in range(country_item.childCount()):
+                child = country_item.child(child_index)
+                if child.isHidden():
                     continue
-                for child_index in range(country_item.childCount()):
-                    child = country_item.child(child_index)
-                    if child.isHidden():
-                        continue
-                    child.setCheckState(
-                        0,
-                        Qt.Unchecked if child.checkState(0) == Qt.Checked
-                        else Qt.Checked,
-                    )
-                country_item.setCheckState(0, _tristate_from_children(country_item))
-        finally:
-            self._updating = False
-        self._sync_selection()
-        self._update_count()
-        self.selection_changed.emit()
+                total += 1
+                if child.checkState(0) == Qt.Checked:
+                    ticked += 1
+
+        if total == 0 or ticked == 0:
+            state = Qt.Unchecked
+        elif ticked == total:
+            state = Qt.Checked
+        else:
+            state = Qt.PartiallyChecked
+        self.header.set_check_state(state)
 
     def _apply_filter(self, text: str) -> None:
         needle = (text or "").strip().lower()
@@ -269,6 +357,7 @@ class CountryPage(QWidget):
                 child.setHidden(not match)
                 visible_children += 1 if match else 0
             country_item.setHidden(visible_children == 0)
+        self._update_header_state()
 
     def _update_count(self) -> None:
         total = len(self._selection.feeds)

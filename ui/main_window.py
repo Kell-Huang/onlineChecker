@@ -158,10 +158,11 @@ class MainWindow(QMainWindow):
 
     def _update_summary(self) -> None:
         chosen = len(self._selection.selected)
-        total = len(self._selection.feeds)
         gos = self._selection.gos.channel_name if self._selection.gos else "none"
-        self.summary_label.setText(
-            f"{chosen} of {total} feeds selected   ·   GOS: {gos}")
+        # The count lives next to the list it describes (and the header
+        # checkbox shows its state); the toolbar only carries the one piece of
+        # context that is global, which is the GOS channel.
+        self.summary_label.setText(f"GOS: {gos}")
         self.start_btn.setEnabled(bool(chosen) and self._worker is None)
 
     def _persist(self) -> None:
