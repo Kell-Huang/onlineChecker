@@ -70,22 +70,37 @@ class CheckableHeader(QHeaderView):
         )
 
     def paintSection(self, painter: QPainter, rect: QRect, logical_index: int) -> None:
-        if logical_index != 0:
-            super().paintSection(painter, rect, logical_index)
-            return
+        """Draw the section background, the checkbox, then the label.
 
+        The label is drawn here for every column rather than by the style:
+        Fusion centres header text and ignores the model's TextAlignmentRole,
+        which left "Site" floating over the middle of a stretched column while
+        its values sat at the left edge.
+        """
         painter.save()
         option = QStyleOptionHeader()
         self.initStyleOption(option)
         option.rect = rect
+        option.text = ""            # the style must not draw the label
         self.style().drawControl(QStyle.CE_Header, option, painter, self)
 
-        self._paint_box(painter, self._box_rect(rect))
-        title = self.model().headerData(0, Qt.Horizontal) or ""
+        if logical_index == 0:
+            self._paint_box(painter, self._box_rect(rect))
+        text_rect = self._label_rect(rect, logical_index)
+
+        title = str(self.model().headerData(logical_index, Qt.Horizontal) or "")
+        metrics = self.fontMetrics()
+        title = metrics.elidedText(title, Qt.ElideRight, max(20, text_rect.width()))
         painter.setPen(QColor("#667085"))
-        painter.drawText(rect.adjusted(self._BOX + self._PAD * 2, 0, 0, 0),
-                         Qt.AlignLeft | Qt.AlignVCenter, str(title))
+        painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignVCenter, title)
         painter.restore()
+
+    def _label_rect(self, rect: QRect, logical_index: int) -> QRect:
+        """Where the section label is drawn: always flush left, after the box."""
+        left = self._PAD
+        if logical_index == 0:
+            left = self._BOX + self._PAD * 2
+        return rect.adjusted(left, 0, -self._PAD, 0)
 
     def _paint_box(self, painter: QPainter, box: QRect) -> None:
         painter.setRenderHint(QPainter.Antialiasing, True)

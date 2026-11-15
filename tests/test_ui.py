@@ -272,3 +272,32 @@ def test_main_window_builds_with_four_tabs(tmp_path, monkeypatch):
         assert window.summary_label.text().startswith("GOS:")
     finally:
         window.deleteLater()
+
+
+def test_header_labels_are_left_aligned_over_their_columns():
+    """Header text starts at the section's left edge, like the values below it.
+
+    Fusion centres header labels and ignores TextAlignmentRole, which left
+    "Site" floating over the middle of a stretched column. The header draws
+    its own labels, so this is the geometry that matters.
+    """
+    _app()
+    from PySide6.QtCore import QRect
+
+    from ui.country_page import CountryPage
+
+    page = CountryPage()
+    page.set_selection(_selection(), COUNTRIES)
+    page.resize(900, 600)
+    page.show()
+    _app().processEvents()
+
+    header = page.header
+    for column in (1, 2):
+        rect = QRect(header.sectionViewportPosition(column), 0,
+                     header.sectionSize(column), header.height())
+        label = header._label_rect(rect, column)
+        assert label.left() == rect.left() + header._PAD, (column, label, rect)
+        # and it must not be centred: the label starts near the left edge
+        assert label.left() < rect.center().x()
+    page.deleteLater()
