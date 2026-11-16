@@ -345,3 +345,22 @@ def test_metadata_missing_success_flag_still_parses():
     client = Client("token", "http://example.invalid")
     client._session = _StubSession({"Sites": [{"id": "1"}]})
     assert client.sites("1") == [{"id": "1"}]
+
+
+def test_feed_url_takes_the_first_active_destination():
+    """Several destinations can be active; the first one wins, every run.
+
+    Confirmed with the owner: a channel holding an EU and a US bucket should
+    not flip between them depending on which request answered first.
+    """
+    from core.productsup import extract_feed_url
+
+    channel = {"feed_destinations": {
+        "4711": {"active": False, "urls": ["https://x/off.csv"]},
+        "4712": {"active": True, "urls": []},                     # active, no url
+        "4713": {"active": True, "urls": ["https://x/first.csv", "https://x/b.csv"]},
+        "4714": {"active": True, "urls": ["https://x/later.csv"]},
+    }}
+    assert extract_feed_url(channel) == "https://x/first.csv"
+    assert extract_feed_url({"feed_destinations": {}}) is None
+    assert extract_feed_url({}) is None

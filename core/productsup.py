@@ -227,7 +227,15 @@ def estimate_request_length(base_url: str, site_id: str, channel_id: str,
 
 
 def extract_feed_url(channel: Dict[str, Any]) -> Optional[str]:
-    """First URL of the first active feed destination."""
+    """First URL of the first active feed destination.
+
+    A channel can hold several destinations (EU bucket, US bucket, S3) and
+    more than one may be active. "First" is the agreed rule — destination
+    order is the order the platform returns them in — so a channel with two
+    live destinations always compares against the same one, run to run.
+    Inactive destinations are skipped even when they still list urls, because
+    that feed is no longer published.
+    """
     for dest in (channel.get("feed_destinations") or {}).values():
         if dest.get("active") and dest.get("urls"):
             return str(dest["urls"][0])

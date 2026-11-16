@@ -248,6 +248,37 @@ def test_expanding_a_channel_row_does_not_crash():
     page.deleteLater()
 
 
+def test_channel_identity_is_the_id_field_not_channel_id():
+    """The payload carries both ``id`` (321) and ``channel_id`` (111).
+
+    The feed url is ``/channel/321/...`` and the stage path uses the same
+    number, so ``id`` identifies the channel. Confirmed with the owner; this
+    test stops a future tidy-up from switching to ``channel_id``, which would
+    point every stage query at a channel that does not exist.
+    """
+    _app()
+    from ui.browse_page import BrowsePage
+
+    page = BrowsePage(lambda: None, lambda: {"token": "", "base_url": ""})
+    page._on_loaded("projects", "", [{"id": "77", "name": "Project"}])
+    page._on_loaded("sites", "77", [{"id": "123", "title": "Site"}])
+    page._on_loaded("channels", "123", [{
+        "id": "321", "channel_id": "111", "site_id": "123", "name": "Criteo DE",
+        "active": True,
+        "feed_destinations": {"4711": {
+            "active": True, "urls": ["https://x/channel/321/criteo_de.csv"]}},
+    }])
+
+    channel_item = page.tree.topLevelItem(0).child(0).child(0)
+    _kind, key, feed, project_id = channel_item.data(0, Qt.UserRole)
+    assert feed.channel_id == "321", "must not be the legacy channel_id 111"
+    assert key == "123/321"
+    assert feed.site_id == "123"
+    assert project_id == "77" and feed.project_id == "77"
+    assert feed.url.endswith("/channel/321/criteo_de.csv")
+    page.deleteLater()
+
+
 def test_feed_without_gos_columns_is_flagged():
     _app()
     from ui.country_page import CountryPage
