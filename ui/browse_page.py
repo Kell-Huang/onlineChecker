@@ -162,6 +162,9 @@ class BrowsePage(QWidget):
         project_id = ""
         if project_item is not None:
             _k, project_id, _d = project_item.data(0, Qt.UserRole)
+        # The site payload carries project_id too; use it when the parent row
+        # has not been populated (or was rebuilt) so the field is never lost.
+        project_id = str(project_id or site_data.get("project_id") or "")
 
         url = extract_feed_url(channel) or ""
         feed = Feed(
@@ -170,7 +173,10 @@ class BrowsePage(QWidget):
             channel_id=str(channel.get("id")),
             url=url,
             site_name=site_name,
-            channel_name=str(channel.get("name") or ""),
+            # Channels follow the same convention as sites: the display name
+            # is `title`. Reading only `name` left display_name falling back
+            # to the channel id.
+            channel_name=str(channel.get("title") or channel.get("name") or ""),
             project_id=str(project_id or ""),
             format=detect_url_format(url),
         )

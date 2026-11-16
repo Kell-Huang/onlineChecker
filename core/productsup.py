@@ -105,6 +105,15 @@ class Client(StageClient):
             payload = response.json()
         except ValueError as exc:
             raise RuntimeError(f"Invalid JSON from {path}: {exc}") from exc
+
+        # The platform answers {"success": true, "Sites": [...]} — a request
+        # that fails with 200 still carries success=false, and returning []
+        # for it made a broken call look like an empty project.
+        if payload.get("success") is False:
+            detail = str(payload.get("message") or payload.get("error") or "").strip()
+            raise RuntimeError(
+                f"API reported failure for {path}" + (f": {detail}" if detail else "")
+            )
         return payload.get(key) or []
 
     # -- product stage ----------------------------------------------------

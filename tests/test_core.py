@@ -294,3 +294,54 @@ def test_report_keeps_unknown_sheets(tmp_path):
     workbook = load_workbook(path)
     assert "Extra" in workbook.sheetnames
     assert [cell.value for cell in workbook["Extra"][1]] == ["a", "b"]
+
+
+# ---------------------------------------------------------------------------
+# Platform metadata responses
+# ---------------------------------------------------------------------------
+
+class _StubResponse:
+    def __init__(self, payload, status=200):
+        self._payload = payload
+        self.status_code = status
+
+    def json(self):
+        return self._payload
+
+
+class _StubSession:
+    def __init__(self, payload, status=200):
+        self._payload = payload
+        self._status = status
+
+    def get(self, _url, timeout=None):
+        return _StubResponse(self._payload, self._status)
+
+
+def test_metadata_failure_is_not_silently_empty():
+    """A 200 with success=false used to come back as an empty list.
+
+    The platform answers {"success": true, "Sites": [...]}; when it answers
+    success=false the tree just showed "0 site(s)", which reads as "this
+    project has no sites" rather than "the call was rejected".
+    """
+    from core.productsup import Client
+
+    client = Client("token", "http://example.invalid")
+    client._session = _StubSession({"success": False, "message": "no access"})
+    with pytest.raises(RuntimeError) as caught:
+        client.sites("1")
+    assert "no access" in str(caught.value)
+
+    client._session = _StubSession(
+        {"success": True, "Sites": [{"id": "123", "title": "site 1"}]})
+    assert client.sites("1") == [{"id": "123", "title": "site 1"}]
+
+
+def test_metadata_missing_success_flag_still_parses():
+    """Only an explicit false is an error; older payloads omit the flag."""
+    from core.productsup import Client
+
+    client = Client("token", "http://example.invalid")
+    client._session = _StubSession({"Sites": [{"id": "1"}]})
+    assert client.sites("1") == [{"id": "1"}]
