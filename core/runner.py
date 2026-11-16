@@ -330,7 +330,12 @@ def _query_api(payloads: List[Dict[str, Any]], settings: Settings,
                     for product in outcome.products:
                         sku = str(product.get(feed.id_column or "id") or "").strip()
                         if sku:
-                            returned[sku] = product
+                            # Keyed lowercase: the anti-join that produced this
+                            # sample already ignores case and surrounding
+                            # whitespace, because the GOS export and the channel
+                            # disagree about both. A case-sensitive lookup here
+                            # would file those SKUs under "not in channel".
+                            returned.setdefault(sku.lower(), product)
                 else:
                     failed_batches += 1
                     failed_skus.update(batch)
@@ -355,8 +360,8 @@ def _query_api(payloads: List[Dict[str, Any]], settings: Settings,
                 normalized = sku.strip().lower()
                 if sku in failed_skus:
                     continue
-                if sku in returned:
-                    product = returned[sku]
+                if normalized in returned:
+                    product = returned[normalized]
                     export_raw = str(product.get("___skipped_export") or "").strip()
                     intermediate_raw = str(
                         product.get("___skipped_intermediate") or "").strip()

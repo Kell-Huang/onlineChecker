@@ -46,7 +46,11 @@ def download_file(url: str, dest: Path, settings: Settings, cancel_event,
     "cancelled" when the run was stopped, so callers can tell a real failure
     from an abort.
     """
-    attempts = settings.download_retries
+    # At least one attempt: "0 retries" means "try once, do not retry", not
+    # "never try". With the loop bound set straight from the setting, an
+    # advanced override of 0 skipped the download entirely and returned an
+    # empty error message.
+    attempts = max(1, settings.download_retries)
     timeouts = settings.download_timeouts
     chunk_size = settings.download_chunk_bytes
 

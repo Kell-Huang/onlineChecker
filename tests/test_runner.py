@@ -179,6 +179,34 @@ def test_report_contains_the_same_numbers(fake_server, workspace):
     assert statuses[("de", "B1")] == "not_in_channel"
 
 
+def test_api_ids_are_matched_case_insensitively(fake_server, workspace,
+                                                monkeypatch):
+    """The anti-join ignores case, so the API lookup has to as well.
+
+    The GOS export and the channel disagree about case on real data — that is
+    why ``compare.filter_online`` lowercases before joining. A case-sensitive
+    lookup against the stage response filed those SKUs under "not in channel"
+    instead of "in channel", which inflated the number the Results tab shows.
+    """
+    monkeypatch.setattr(sys.modules[__name__], "UK_PRODUCTS", [
+        {"id": "b1"},
+        {"id": "b2", "___skipped_export": "3::price::is 0",
+         "___skipped_intermediate": ""},
+    ])
+
+    settings = Settings(output_dir=workspace, max_per_country=1000,
+                        random_seed=42, download_concurrency=2)
+    result = runner.run(_selection(fake_server), settings,
+                        {"token": "test-token", "base_url": fake_server},
+                        Reporter(), threading.Event())
+
+    assert result.success, result.error
+    uk = {row["country"]: row for row in result.summary}["uk"]
+    assert uk["in_channel_count"] == 1          # B1, returned as "b1"
+    assert uk["skipped_count"] == 1             # B2, returned as "b2"
+    assert uk["not_in_channel_count"] == 1      # A2, never returned
+
+
 def test_missing_token_is_a_config_error(workspace):
     selection = Selection(gos=GosFeed(site_id="1", channel_id="9",
                                       url="http://x/gos.csv"),
