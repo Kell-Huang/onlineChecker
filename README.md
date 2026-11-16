@@ -96,7 +96,13 @@ tests/                  pytest suites
 
 After a run the Results tab shows one row per country:
 
-| Country | Online | Not in GMC | Skipped | Top reason | Share |
+| Country | SFCC Online | Google Shopping | Not in Google Shopping | Skipped | Skip reason |
+|---|---|---|---|---|---|
+
+The first three counts cover every product: online in SFCC, present in the
+Google Merchant Center feed, and online but absent from that feed. `Skipped`
+and its reason come from the sample the API was asked about, not the whole
+population — hover a header to see which is which.
 
 The workbook still holds everything else — sampled detail, skip-reason
 distribution, API log, failed batches — for when a number needs explaining.

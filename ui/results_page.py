@@ -5,6 +5,12 @@ when the numbers are already in memory. This page shows the numbers that
 matter per country and nothing else — the workbook still holds the sampled
 detail, the API log and the failed batches for when something needs digging.
 
+Three of the columns are whole-population counts (online, in the feed, missing
+from the feed) and two come from the sample the API was asked about (skipped,
+and why). The sampled ones say so in their header tooltip; mixing the two
+without saying which is which is how "3 missing, 1 skipped" gets misread as a
+ratio of the same set.
+
 The skip reasons are drawn as text plus a share bar in the same cell. They
 were two columns once, but the reason column has to stretch (it holds the
 longest strings) and stretching it pushed each bar hundreds of pixels away
@@ -24,11 +30,27 @@ from .theme import DANGER, TEXT_MUTED, WARNING
 
 COLUMNS = [
     ("country", "Country", 100, Qt.AlignLeft),
-    ("gos_count", "SFCC Online", 120, Qt.AlignRight),
-    ("not_in_channel_count", "Not in Google Shopping", 190, Qt.AlignRight),
+    ("gos_count", "SFCC Online", 110, Qt.AlignRight),
+    ("feed_count", "Google Shopping", 145, Qt.AlignRight),
+    ("missing_count", "Not in Google Shopping", 180, Qt.AlignRight),
     ("skipped_count", "Skipped", 90, Qt.AlignRight),
     ("top_reason_1", "Skip reason", 0, Qt.AlignLeft),      # 0 = stretch
 ]
+
+# The first three counts are over every product; the last two are over the
+# sample. Without saying so, "3 missing, 1 skipped" reads as a ratio of the
+# same set — it is not.
+HEADER_TIPS = {
+    "gos_count": "Products online in SFCC for this country\n"
+                 "(online = true, stock > 0, price > 0).",
+    "feed_count": "Unique IDs in this country's Google Merchant Center feed.",
+    "missing_count": "Online in SFCC but absent from the Google Merchant "
+                     "Center feed.",
+    "skipped_count": "Of the sampled missing SKUs, how many are in the channel "
+                     "but skipped for export.",
+    "top_reason_1": "The two most common skip reasons, each with its share of "
+                    "the skipped set.",
+}
 
 REASON_COLUMN = len(COLUMNS) - 1
 
@@ -143,10 +165,11 @@ class ResultsPage(QWidget):
         self.table.setHorizontalHeaderLabels([title for _k, title, _w, _a in COLUMNS])
         # Header text must sit over the data it labels: Qt centres header items
         # by default, which left the numeric headings over nothing.
-        for index, (_key, _title, _width, align) in enumerate(COLUMNS):
+        for index, (key, _title, _width, align) in enumerate(COLUMNS):
             header_item = self.table.horizontalHeaderItem(index)
             if header_item is not None:
                 header_item.setTextAlignment(align | Qt.AlignVCenter)
+                header_item.setToolTip(HEADER_TIPS.get(key, ""))
 
         self.table.verticalHeader().setVisible(False)
         self.table.verticalHeader().setDefaultSectionSize(ROW_HEIGHT)
@@ -218,8 +241,10 @@ def _totals_text(rows: List[Dict[str, Any]]) -> str:
     if not rows:
         return "No countries were compared."
     online = sum(int(row.get("gos_count") or 0) for row in rows)
-    missing = sum(int(row.get("not_in_channel_count") or 0) for row in rows)
+    in_feed = sum(int(row.get("feed_count") or 0) for row in rows)
+    missing = sum(int(row.get("missing_count") or 0) for row in rows)
     skipped = sum(int(row.get("skipped_count") or 0) for row in rows)
     countries = len(rows)
     return (f"{countries} countries  ·  {online:,} online  ·  "
-            f"{missing:,} not in Google Shopping  ·  {skipped:,} skipped")
+            f"{in_feed:,} in Google Shopping  ·  {missing:,} missing  ·  "
+            f"{skipped:,} skipped")

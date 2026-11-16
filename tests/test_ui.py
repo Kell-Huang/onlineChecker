@@ -228,32 +228,42 @@ def test_results_page_renders_the_summary_and_both_reasons():
 
     page = ResultsPage()
     page.set_rows([
-        {"country": "uk", "gos_count": 100, "not_in_channel_count": 7,
-         "skipped_count": 2, "top_reason_1": '"price" is 0', "top_reason_1_pct": 50.0,
+        {"country": "uk", "gos_count": 100, "feed_count": 60, "missing_count": 40,
+         "not_in_channel_count": 7, "skipped_count": 2,
+         "top_reason_1": '"price" is 0', "top_reason_1_pct": 50.0,
          "top_reason_2": '"stock" is 0', "top_reason_2_pct": 25.0},
-        {"country": "de", "gos_count": 50, "not_in_channel_count": 0,
-         "skipped_count": 0, "top_reason_1": "", "top_reason_1_pct": 0.0,
+        {"country": "de", "gos_count": 50, "feed_count": 50, "missing_count": 0,
+         "not_in_channel_count": 0, "skipped_count": 0,
+         "top_reason_1": "", "top_reason_1_pct": 0.0,
          "top_reason_2": "", "top_reason_2_pct": 0.0},
     ])
 
-    assert page.table.columnCount() == len(COLUMNS) == 5
+    assert page.table.columnCount() == len(COLUMNS) == 6
     assert page.table.rowCount() == 2
     assert page.table.item(0, 0).text() == "uk"
     assert page.table.item(0, 1).text() == "100"
-    assert page.table.item(0, 4).text() == '"price" is 0'
+    # "Google Shopping" is the feed count, and "Not in Google Shopping" is the
+    # full anti-join (missing_count) — not the sampled not_in_channel_count,
+    # which is 7 here and must not appear.
+    assert page.table.item(0, 2).text() == "60"
+    assert page.table.item(0, 3).text() == "40"
+    assert page.table.item(0, 5).text() == '"price" is 0'
 
     # The reason cell carries both reasons with their shares, in order.
-    pairs = page.table.item(0, 4).data(Qt.UserRole)
+    pairs = page.table.item(0, 5).data(Qt.UserRole)
     assert pairs == [('"price" is 0', 50.0), ('"stock" is 0', 25.0)]
-    assert page.table.item(1, 4).data(Qt.UserRole) == []
+    assert page.table.item(1, 5).data(Qt.UserRole) == []
 
     headers = [page.table.horizontalHeaderItem(i).text()
                for i in range(page.table.columnCount())]
-    assert headers == ["Country", "SFCC Online", "Not in Google Shopping",
-                       "Skipped", "Skip reason"]
+    assert headers == ["Country", "SFCC Online", "Google Shopping",
+                       "Not in Google Shopping", "Skipped", "Skip reason"]
 
-    assert "2 countries" in page.totals_label.text()
-    assert "150 online" in page.totals_label.text()
+    totals = page.totals_label.text()
+    assert "2 countries" in totals
+    assert "150 online" in totals
+    assert "110 in Google Shopping" in totals
+    assert "40 missing" in totals
     page.deleteLater()
 
 
