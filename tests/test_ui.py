@@ -224,12 +224,14 @@ def test_expanding_a_channel_row_does_not_crash():
     page._on_loaded("projects", "", [{"id": "1", "name": "Project"}])
     page._on_loaded("sites", "1", [{"id": "2", "title": "Site"}])
     page._on_loaded("channels", "2", [
-        # The platform names channels with `title`, like sites; `name` is the
-        # older spelling and still has to work.
+        # Channels name themselves with `name`; sites use `title`. Both
+        # spellings have to work, and `name` wins when both are present.
         {"id": "3", "title": "Channel A", "active": True,
          "feed_destinations": {"d": {"active": True, "urls": ["http://x/c.csv"]}}},
         {"id": "4", "name": "Channel B", "active": True,
          "feed_destinations": {"d": {"active": True, "urls": ["http://x/d.csv"]}}},
+        {"id": "5", "name": "Channel C", "title": "Not this", "active": True,
+         "feed_destinations": {"d": {"active": True, "urls": ["http://x/e.csv"]}}},
     ])
 
     project = page.tree.topLevelItem(0)
@@ -239,6 +241,7 @@ def test_expanding_a_channel_row_does_not_crash():
     assert site.text(0) == "Site"
     assert channel.text(0) == "Channel A"
     assert site.child(1).text(0) == "Channel B"
+    assert site.child(2).text(0) == "Channel C"
 
     page._on_expanded(channel)      # used to raise ValueError
     page.tree.expandAll()           # the shortcut path

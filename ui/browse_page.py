@@ -173,10 +173,11 @@ class BrowsePage(QWidget):
             channel_id=str(channel.get("id")),
             url=url,
             site_name=site_name,
-            # Channels follow the same convention as sites: the display name
-            # is `title`. Reading only `name` left display_name falling back
-            # to the channel id.
-            channel_name=str(channel.get("title") or channel.get("name") or ""),
+            # Channels are the opposite of sites: their display name is
+            # `name` ("Criteo DE"), and `title` only exists on some payloads.
+            # `export_name` is the short form used in the export file, not a
+            # label, so it is deliberately not consulted.
+            channel_name=str(channel.get("name") or channel.get("title") or ""),
             project_id=str(project_id or ""),
             format=detect_url_format(url),
         )
