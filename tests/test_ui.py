@@ -191,6 +191,55 @@ def test_header_checkbox_sits_inside_the_first_section():
     page.deleteLater()
 
 
+def test_site_and_project_labels_prefer_title_over_id():
+    """The platform API returns a site's name under ``title``.
+
+    Reading only ``name`` fell through to the raw id, so the Browse tree
+    listed ``1094255`` where it should have said ``vidaXL.UAE-AR`` — and the
+    same lookup fed the Countries page's "Site" column, which came out blank.
+    """
+    from ui.browse_page import _project_label, _site_label
+
+    assert _site_label({"id": "1094255", "title": "vidaXL.UAE-AR"}) == "vidaXL.UAE-AR"
+    assert _site_label({"id": "1", "name": "vidaxl.fr"}) == "vidaxl.fr"
+    # title wins when both exist, matching the platform's own naming
+    assert _site_label({"id": "2", "title": "A", "name": "B"}) == "A"
+    # no usable name at all: an identifiable fallback, never a bare id
+    assert _site_label({"id": "1094255"}) == "Site 1094255"
+    assert _site_label({"id": "1094255", "title": "   "}) == "Site 1094255"
+    assert _project_label({"id": "13231", "name": "vidaXL"}) == "vidaXL"
+    assert _project_label({"id": "13231"}) == "Project 13231"
+
+
+def test_expanding_a_channel_row_does_not_crash():
+    """Channel rows carry a 4-tuple; expanding one used to raise ValueError.
+
+    Reachable from the keyboard: "expand all" emits itemExpanded for leaves
+    too, and the handler unpacked three names before checking the kind.
+    """
+    _app()
+    from ui.browse_page import BrowsePage
+
+    page = BrowsePage(lambda: None, lambda: {"token": "", "base_url": ""})
+    page._on_loaded("projects", "", [{"id": "1", "name": "Project"}])
+    page._on_loaded("sites", "1", [{"id": "2", "title": "Site"}])
+    page._on_loaded("channels", "2", [{
+        "id": "3", "name": "Channel", "active": True,
+        "feed_destinations": {"d": {"active": True, "urls": ["http://x/c.csv"]}},
+    }])
+
+    project = page.tree.topLevelItem(0)
+    site = project.child(0)
+    channel = site.child(0)
+    assert project.text(0) == "Project"
+    assert site.text(0) == "Site"
+    assert channel.text(0) == "Channel"
+
+    page._on_expanded(channel)      # used to raise ValueError
+    page.tree.expandAll()           # the shortcut path
+    page.deleteLater()
+
+
 def test_feed_without_gos_columns_is_flagged():
     _app()
     from ui.country_page import CountryPage

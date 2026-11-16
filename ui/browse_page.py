@@ -122,8 +122,9 @@ class BrowsePage(QWidget):
         if kind == "projects":
             self.tree.clear()
             for project in items:
-                item = QTreeWidgetItem([str(project.get("name") or project.get("id"))])
+                item = QTreeWidgetItem([_project_label(project)])
                 item.setData(0, Qt.UserRole, ("project", str(project.get("id")), project))
+                item.setToolTip(0, _id_tip("Project", project))
                 item.addChild(_placeholder())
                 self.tree.addTopLevelItem(item)
             self.status.setText(f"{len(items)} project(s).")
@@ -136,8 +137,9 @@ class BrowsePage(QWidget):
 
         if kind == "sites":
             for site in items:
-                item = QTreeWidgetItem([str(site.get("name") or site.get("id"))])
+                item = QTreeWidgetItem([_site_label(site)])
                 item.setData(0, Qt.UserRole, ("site", str(site.get("id")), site))
+                item.setToolTip(0, _id_tip("Site", site))
                 item.addChild(_placeholder())
                 parent.addChild(item)
             self.status.setText(f"{len(items)} site(s).")
@@ -153,7 +155,9 @@ class BrowsePage(QWidget):
 
     def _channel_item(self, channel: dict, site_item: QTreeWidgetItem) -> QTreeWidgetItem:
         site_kind, site_id, site_data = site_item.data(0, Qt.UserRole)
-        site_name = str(site_data.get("name") or "")
+        # Same `title`-vs-`name` trap as the site row itself: an empty name
+        # here left the Countries page's "Site" column blank.
+        site_name = _site_label(site_data)
         project_item = site_item.parent()
         project_id = ""
         if project_item is not None:
@@ -182,9 +186,14 @@ class BrowsePage(QWidget):
         return item
 
     def _on_expanded(self, item: QTreeWidgetItem) -> None:
-        kind, item_id, _data = item.data(0, Qt.UserRole) or (None, None, None)
-        if kind not in ("project", "site"):
+        # Channel rows carry a 4-tuple (kind, key, feed, project_id) while
+        # projects and sites carry 3. Unpacking first raised ValueError on
+        # every channel — reachable with Ctrl+Shift+* ("expand all"), which
+        # emits itemExpanded for leaves too.
+        data = item.data(0, Qt.UserRole) or ()
+        if not data or data[0] not in ("project", "site"):
             return
+        kind, item_id = data[0], data[1]
         if item.childCount() != 1 or item.child(0).data(0, Qt.UserRole):
             return          # already loaded
         self._load("sites" if kind == "project" else "channels", item_id)
@@ -272,6 +281,35 @@ def _placeholder() -> QTreeWidgetItem:
     item.setForeground(0, Qt.gray)
     item.setData(0, Qt.UserRole, None)
     return item
+
+
+def _named(item: dict, fallback_prefix: str) -> str:
+    """Display label for a platform object.
+
+    Sites come back with their name under ``title``, not ``name`` — reading
+    only ``name`` fell through to the raw id, so the Browse tree listed
+    ``1094255`` instead of ``vidaXL.UAE-AR``. Projects use ``name``; the
+    ``title`` check first costs nothing and covers both.
+    """
+    label = str(item.get("title") or item.get("name") or "").strip()
+    if label:
+        return label
+    identifier = str(item.get("id") or "").strip()
+    return f"{fallback_prefix} {identifier}".strip()
+
+
+def _project_label(project: dict) -> str:
+    return _named(project, "Project")
+
+
+def _site_label(site: dict) -> str:
+    return _named(site, "Site")
+
+
+def _id_tip(kind: str, item: dict) -> str:
+    """The id in the tooltip, so rows stay short but nothing is lost."""
+    identifier = str(item.get("id") or "").strip()
+    return f"{kind} ID: {identifier}" if identifier else ""
 
 
 def _id_of(item: QTreeWidgetItem) -> str:
