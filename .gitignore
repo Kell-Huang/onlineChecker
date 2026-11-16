@@ -8,3 +8,7 @@ logs/
 .pytest_cache/
 config_backup/
 .workbuddy-ai/
+
+# The token lives on the machine that runs the app, never in the repo.
+# Fill it in through Settings; the file is re-created there.
+config/credentials.json
